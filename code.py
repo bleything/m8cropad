@@ -1,94 +1,51 @@
 from adafruit_macropad import MacroPad
-from adafruit_hid.keycode import Keycode
-from rainbowio import colorwheel
+
+from constants import *
 
 ################################################################################
 ### config
 ################################################################################
 
+### which way do you want the knob to point? UP, DOWN, LEFT, or RIGHT
+
+KNOB_GOES = "UP"
+
+### set the colors for the various buttons and states. See COLOR_CODES in
+### constants.py for the list of color names
+
 COLORS = {
-    "red": 0,
-    "orange": 12,
-    "green": 72,
-    "blue": 170,
-    "yellow": 28,
-    "cyan": 120,
-    "purple": 196,
-    "pink": 230,
+    "pressed":  COLOR_CODES["orange"],
+    "arrows":   COLOR_CODES["cyan"],
+    "function": COLOR_CODES["purple"],
+    "shift":    COLOR_CODES["pink"],
+    "play":     COLOR_CODES["green"]
 }
-
-COLORS["pressed"] = COLORS["orange"]
-
-KEYS = {
-    ### arrows
-
-    1: {
-        "name": "up",
-        "color": "cyan",
-        "code": Keycode.UP_ARROW
-    },
-
-    4: {
-        "name": "left",
-        "color": "cyan",
-        "code": Keycode.LEFT_ARROW
-    },
-
-    5: {
-        "name": "down",
-        "color": "cyan",
-        "code": Keycode.DOWN_ARROW
-    },
-
-    6: {
-        "name": "right",
-        "color": "cyan",
-        "code": Keycode.RIGHT_ARROW
-    },
-
-    ### function keys
-
-    2: {
-        "name": "opt",
-        "color": "purple",
-        "code": Keycode.Z
-    },
-
-    3: {
-        "name": "edit",
-        "color": "purple",
-        "code": Keycode.X
-    },
-
-    ### shift / play
-
-    9: {
-        "name": "shift",
-        "color": "pink",
-        "code": Keycode.LEFT_SHIFT
-    },
-
-    10: {
-        "name": "play",
-        "color": "green",
-        "code": Keycode.SPACEBAR
-    }
-}
-
-def color_number(name):
-    return colorwheel(COLORS[name])
-
-macropad = MacroPad(rotation=90)  # create the macropad object, rotate orientation
 
 ################################################################################
-### LED setup
+### shouldn't need to edit anything below here
+################################################################################
+
+angle = ORIENTATIONS[KNOB_GOES]["angle"]
+orientation = ORIENTATIONS[KNOB_GOES]["orientation"]
+macropad = MacroPad(rotation=angle)  # create the macropad object, rotate orientation
+
+################################################################################
+### key and LED setup
 ################################################################################
 
 macropad.pixels.brightness = 0.1
 macropad.pixels.fill(0)
 
-for key, config in KEYS.items():
-    macropad.pixels[key] = color_number(config['color'])
+keys = {}
+
+for key, config in KEY_CONFIG.items():
+    key_number = config["key"][orientation]
+    color = COLORS[config["color"]]
+
+    keys[key_number] = config
+    keys[key_number]["color"] = color
+
+    macropad.pixels[key_number] = color
 
 ################################################################################
 ### display setup
@@ -108,9 +65,9 @@ while True:
             text_lines[1].text = "press: {}".format(key)
 
             try:
-                keycode = KEYS[key]["code"]
+                keycode = keys[key]["code"]
 
-                macropad.pixels[key] = colorwheel(COLORS["pressed"])
+                macropad.pixels[key] = COLORS["pressed"]
                 macropad.keyboard.press(keycode)
             except KeyError:
                 # undefined key; move along
@@ -121,10 +78,10 @@ while True:
             text_lines[1].text = "release: {}".format(key)
 
             try:
-                keycode = KEYS[key]["code"]
-                color = KEYS[key]["color"]
+                keycode = keys[key]["code"]
+                color = keys[key]["color"]
 
-                macropad.pixels[key] = color_number(color)
+                macropad.pixels[key] = color
                 macropad.keyboard.release(keycode)
             except KeyError:
                 # undefined key; move along

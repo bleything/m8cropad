@@ -2,8 +2,8 @@ m8cropad
 ================================================================================
 
 This repo contains firmware that allows you to use the [Adafruit Macropad] as a
-controller for the [M8 Tracker Headless]. To use, copy `code.py` to your
-macropad and then load up the [M8 Web Display].
+controller for the [M8 Tracker Headless]. To use, copy `code.py` and
+`constants.py` to your macropad and then load up the [M8 Web Display].
 
 [Adafruit Macropad]: https://www.adafruit.com/product/5128
 [M8 Tracker Headless]: https://github.com/Dirtywave/M8HeadlessFirmware
